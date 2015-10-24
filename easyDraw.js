@@ -79,23 +79,39 @@ class canvas {
     }
     return this;
   }
-  squared(rw, rh, c) { //rectwidth,rectheight,color
+  squared(prop, c, num) { //[rectwidth,rectheight],color
+    //num =boolean
     let color = c || "rgba(93, 89, 92,.5)",
       w = this.width,
       h = this.height,
-      sqw = rw || 10,
-      sqh = rh || 10;
+      sqw = prop[0] || 20,
+      sqh = prop[1] || 20,
+      cntH = 0,
+      cntV = 0;
     for (let i = 0; i <= w; i += sqw) {
-      d.unique()
+      this.unique()
         .penTo([i, 0])
         .line([i, h])
         .stroke(color);
+      if(num){
+      this.text(cntH.toString(), [(i-sqw/2), 0], {
+        base: "hanging",
+        align:"center"
+      }).fill();
+      cntH++;
+      }
     }
     for (let i = 0; i <= h; i += sqh) {
-      d.unique()
+      this.unique()
         .penTo([0, i])
         .line([w, i])
         .stroke(color);
+        if(num){
+      this.text(cntV.toString(), [0, (i-sqh/2)], {
+
+      }).fill();
+      cntV++;
+      }
     }
     return this;
   }
@@ -104,7 +120,7 @@ class canvas {
     let that = this,
       txt = "", //text to write
       p = { //defaults
-        fsize:"15px",
+        fsize: "15px",
         font: "sans-serif",
         align: "start",
         base: "alphabetic",
@@ -117,17 +133,18 @@ class canvas {
       props.hasOwnProperty("base") ? p.base = props.base : false;
       props.hasOwnProperty("direction") ? p.direction = props.direction : false;
     }
-    let fnt=`${p.fsize} ${p.font}`;
-    that.context.font=fnt;
-    that.context.textAlign=p.align;
-    that.context.textBaseline=p.base;
-    that.context.direction=p.direction;
-    if(text)txt = text;
-      else throw new SyntaxError("Text argument cannot be empty while using canvas#text");
-    if(!coords && !(coords.length > 1))throw new SyntaxError("canvas#text requires an array containing coordinates of the text no given");
+    let fnt = `${p.fsize} ${p.font}`;
+    that.context.font = fnt;
+    that.context.textAlign = p.align;
+    that.context.textBaseline = p.base;
+    that.context.direction = p.direction;
+    if (text) txt = text;
+    else throw new SyntaxError("Text argument cannot be empty while using canvas#text");
+    if (!coords && !(coords.length > 1)) throw new SyntaxError("canvas#text requires an array containing coordinates of the text no given");
     return {
       fill: function(col) {
         let color = col || "black";
+        that.unique();
         that.context.fillStyle = col;
         that.context.fillText(txt, coords[0], coords[1]);
         that.fill(color);
@@ -136,9 +153,10 @@ class canvas {
       stroke(c, w) {
         let color = c || "black",
           lineWidth = w || 1;
+        that.unique();
         that.context.strokeStyle = color;
         that.context.lineWidth = lineWidth;
-        that.context.strokeText(txt,coords[0],coords[1]);
+        that.context.strokeText(txt, coords[0], coords[1]);
         that.stroke(color, lineWidth);
         return that;
       }
