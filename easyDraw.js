@@ -40,21 +40,21 @@ class canvas {
     this.context.stroke();
     return this;
   };
-  penTo(a) { //[x,y]
+  penTo(coords) { //[x,y]
     this.context.beginPath();
-    this.context.moveTo(a[0], a[1]);
+    this.context.moveTo(coords[0], coords[1]);
     return this;
   }
-  line(a) { //[x,y]
-    this.context.lineTo(a[0], a[1]);
+  line(coords) { //[x,y]
+    this.context.lineTo(coords[0], coords[1]);
     return this;
   };
-  rect(a) { //{a,y,w,h}
+  rect(props) { //{x,y,w,h}
     this
-      .penTo([a.x, a.y])
-      .line([a.x, a.y + a.h])
-      .line([a.x + a.w, a.y + a.h])
-      .line([a.x + a.w, a.y])
+      .penTo([props.x, props.y])
+      .line([props.x, props.y + props.h])
+      .line([props.x + props.w, props.y + props.h])
+      .line([props.x + props.w, props.y])
       .close();
     return this;
   };
@@ -73,8 +73,7 @@ class canvas {
     this.unique();
     while (len--) {
       count === 0 ?
-      that.penTo([arg[0][len][0], arg[0][len][1]])
-      : that.line([arg[0][len][0], arg[0][len][1]]);
+        that.penTo([arg[0][len][0], arg[0][len][1]]) : that.line([arg[0][len][0], arg[0][len][1]]);
       // debugger;
       ++count;
     }
@@ -99,5 +98,50 @@ class canvas {
         .stroke(color);
     }
     return this;
+  }
+  text(text, coords, props) { //coords=[x,y]
+    //props are an  optional object in order to override defaults
+    let that = this,
+      txt = "", //text to write
+      p = { //defaults
+        fsize:"15px",
+        font: "sans-serif",
+        align: "start",
+        base: "alphabetic",
+        direction: "ltr"
+      };
+    if (props) {
+      props.hasOwnProperty("fsize") ? p.fsize = props.fsize : false;
+      props.hasOwnProperty("font") ? p.font = props.font : false;
+      props.hasOwnProperty("align") ? p.align = props.align : false;
+      props.hasOwnProperty("base") ? p.base = props.base : false;
+      props.hasOwnProperty("direction") ? p.direction = props.direction : false;
+    }
+    let fnt=`${p.fsize} ${p.font}`;
+    that.context.font=fnt;
+    that.context.textAlign=p.align;
+    that.context.textBaseline=p.base;
+    that.context.direction=p.direction;
+    if(text)txt = text;
+      else throw new SyntaxError("Text argument cannot be empty while using canvas#text");
+    if(!coords && !(coords.length > 1))throw new SyntaxError("canvas#text requires an array containing coordinates of the text no given");
+    return {
+      fill: function(col) {
+        let color = col || "black";
+        that.context.fillStyle = col;
+        that.context.fillText(txt, coords[0], coords[1]);
+        that.fill(color);
+        return that;
+      },
+      stroke(c, w) {
+        let color = c || "black",
+          lineWidth = w || 1;
+        that.context.strokeStyle = color;
+        that.context.lineWidth = lineWidth;
+        that.context.strokeText(txt,coords[0],coords[1]);
+        that.stroke(color, lineWidth);
+        return that;
+      }
+    }
   }
 };
